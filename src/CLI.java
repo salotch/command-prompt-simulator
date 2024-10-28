@@ -17,24 +17,28 @@ public class CLI {
             String cmd = parts[0];
             String[] cmdArgs = new String[parts.length - 1];
             System.arraycopy(parts, 1, cmdArgs, 0, cmdArgs.length);
-            System.out.println("List of commands: ls, touch, >");
 
             switch (cmd) {
                 case "ls":
                     if (cmdArgs.length > 0 && cmdArgs[0].equals("-a")) {
-                        listAllFiles();
+                        String files = listAllFiles();
+                        boolean op = false;
+                        for (int i = 1; i < cmdArgs.length;  i++){
+                            if (cmdArgs[i].contains(">")){
+                                redirectToFile(files, cmdArgs[i+1]);
+                                op = true;
+                                break;
+                            }
+                        }
+                        if(!op)
+                            System.out.println(files);
+
                         System.out.println("Print done\n");
                     }
                     break;
                 case "touch":
                     if (cmdArgs.length > 0) {
                         createFile(cmdArgs[0]);
-                        continue;
-                    }
-                    break;
-                case ">":
-                    if (cmdArgs.length > 0) {
-                        redirectToFile(cmdArgs[0]);
                         continue;
                     }
                     break;
@@ -47,17 +51,17 @@ public class CLI {
         }
     }
 
-    private static void listAllFiles(){
+    // Method for ls -a that returns all files (including hidden ones) as a string
+    public static String listAllFiles() {
         File currentDir = new File(".");
         File[] files = currentDir.listFiles();
+        if (files == null) return "";
 
-        if (files != null) {
-            for (File file : files) {
-                System.out.println(file.getName());
-            }
-        } else {
-            System.out.println("Unable to list files.");
+        StringBuilder fileNames = new StringBuilder();
+        for (File file : files) {
+            fileNames.append(file.getName()).append("\n");
         }
+        return fileNames.toString();
     }
 
     private static void createFile(String fileName) {
@@ -77,12 +81,15 @@ public class CLI {
             System.out.println("Error: " + e.getMessage());
         }
     }
-    private static void redirectToFile(String fileName) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(fileName))) {
-            writer.println("Output redirected to " + fileName);
-            System.out.println("Output written to " + fileName);
+
+    // Method to redirect output to a file
+    public static boolean redirectToFile(String content, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.write(content);
+            return true;
         } catch (IOException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.err.println("Error writing to file: " + e.getMessage());
+            return false;
         }
     }
 
