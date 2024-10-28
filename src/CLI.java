@@ -17,21 +17,25 @@ public class CLI {
             String cmd = parts[0];
             String[] cmdArgs = new String[parts.length - 1];
             System.arraycopy(parts, 1, cmdArgs, 0, cmdArgs.length);
+            System.out.println("List of commands: ls, touch, >");
 
             switch (cmd) {
                 case "ls":
                     if (cmdArgs.length > 0 && cmdArgs[0].equals("-a")) {
-                        //listAllFiles();
+                        listAllFiles();
+                        System.out.println("Print done\n");
                     }
                     break;
                 case "touch":
                     if (cmdArgs.length > 0) {
-                        //createFile(cmdArgs[0]);
+                        createFile(cmdArgs[0]);
+                        continue;
                     }
                     break;
                 case ">":
                     if (cmdArgs.length > 0) {
-                        //redirectToFile(cmdArgs[0]);
+                        redirectToFile(cmdArgs[0]);
+                        continue;
                     }
                     break;
                 case "exit":
@@ -42,4 +46,44 @@ public class CLI {
             }
         }
     }
+
+    private static void listAllFiles(){
+        File currentDir = new File(".");
+        File[] files = currentDir.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                System.out.println(file.getName());
+            }
+        } else {
+            System.out.println("Unable to list files.");
+        }
+    }
+
+    private static void createFile(String fileName) {
+        File file = new File(fileName);
+        try {
+            if (file.exists()) {
+                file.setLastModified(System.currentTimeMillis());
+                System.out.println("File timestamp updated.");
+            } else {
+                if (file.createNewFile()) {
+                    System.out.println("File created: " + fileName);
+                } else {
+                    System.out.println("Failed to create file.");
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+    private static void redirectToFile(String fileName) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(fileName))) {
+            writer.println("Output redirected to " + fileName);
+            System.out.println("Output written to " + fileName);
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
 }
