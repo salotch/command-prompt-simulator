@@ -1,70 +1,85 @@
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
-public class LsCommand implements Command {
-    private boolean showHidden = false;
-    private String directoryPath = ".";
+public class CLI {
+    private final Map<String, Command> commandMap;
 
-    // Methods to configure options
-    public void setShowHidden(boolean showHidden) {
-        this.showHidden = showHidden;
+    public CLI() {
+        commandMap = new HashMap<>();
+        commandMap.put("ls", new LsCommand());
+        commandMap.put("touch", new TouchCommand());
+        commandMap.put("rmdir", new RmdirCommand());
+        commandMap.put("cat", new CatCommand());
+        // Add other commands here
     }
 
-    public void setDirectoryPath(String directoryPath) {
-        this.directoryPath = directoryPath;
-    }
+    public void executeCommand(String input) {
+        String[] parts = input.split(" ");
+        String commandName = parts[0];
+        Command command = commandMap.get(commandName);
 
-    @Override
-    public void execute(String[] args) {
-        // Parse arguments to set options
-        parseArguments(args);
-
-        // Create a file object for the specified directory
-        File directory = new File(directoryPath);
-        if (!directory.isDirectory()) {
-            System.out.println("Error: " + directoryPath + " is not a directory.");
+        if (command == null) {
+            System.out.println("Command not found");
             return;
         }
 
-        // List files based on the `showHidden` flag
-        StringBuilder output = new StringBuilder();
-        File[] files = directory.listFiles();
-
-        if (files != null) {
-            for (File file : files) {
-                if (showHidden || !file.isHidden()) {
-                    output.append(file.getName()).append("\n");
-                }
-            }
-        } else {
-            System.out.println("Error: Unable to access directory contents.");
+        if ("help".equalsIgnoreCase(commandName)){
+            showHelp();
             return;
         }
 
-        // Print the result to the console
-        System.out.print(output.toString());
+        // Check for redirection operators
+        if (input.contains(">")  || input.contains(">>")) {
+            boolean append = input.contains(">>");
+            String fileName = parts[parts.length - 1];
+            command = new RedirectionCommand(command, fileName, append);
+        }
+        // Pass all parts (including arguments and flags) to `execute` method in Command
+        command.execute(parts);
 
-        // Returning to current directory
-        directoryPath = ".";
     }
 
-    // Helper method to parse command arguments
-    private void parseArguments(String[] args) {
+    public void start() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to the CLI. Type 'exit' to quit.");
 
-        for (String arg : args) {
-            System.out.println(arg);
-            if (arg.equals("-a")) {
-                showHidden = true; // Enable hidden files display
-            } else if (arg.equals("-r")){
-                // code for ls -r
-                continue;
-            }else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
-                // If it's not a redirection or pipe symbol, assume it's a directory path
-                directoryPath = arg;
+        while (true) {
+            System.out.print("> ");
+            String input = scanner.nextLine().trim();
+
+            if ("exit".equalsIgnoreCase(input)) {
+                System.out.println("Exiting CLI.");
+                break;
             }
+
+            executeCommand(input);
         }
 
+        scanner.close();
+    }
+
+    public static void main(String[] args) {
+        CLI cli = new CLI();
+        cli.start();
+    }
+
+    public static void showHelp() {
+        System.out.println("Available commands:");
+        System.out.println("pwd       - Print the current working directory.");
+        System.out.println("cd <dir>  - Change the directory to <dir>.");
+        System.out.println("ls        - List files and directories in the current directory.");
+        System.out.println("ls -a     - List all files, including hidden ones, in the current directory.");
+        System.out.println("ls -r     - List files in reverse alphabetical order.");
+        System.out.println("mkdir <dir> - Create a new directory named <dir>.");
+        System.out.println("rmdir <dir> - Remove an empty directory named <dir>.");
+        System.out.println("touch <file> - Create a new file named <file> or update its timestamp.");
+        System.out.println("mv <src> <dest> - Move or rename a file from <src> to <dest>.");
+        System.out.println("rm <file> - Delete the specified file.");
+        System.out.println("cat <file1> <file2> ... - Display contents of files in sequence.");
+        System.out.println("> <file> - Redirect output to a file, overwriting the file.");
+        System.out.println(">> <file> - Append output to a file.");
+        System.out.println("| - Pipe the output of one command as input to another command.");
     }
 
 }
