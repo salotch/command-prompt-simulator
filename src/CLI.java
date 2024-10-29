@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.Scanner;
-
+import java.util.Arrays;
+import java.io.File;
 public class CLI {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
@@ -20,7 +21,8 @@ public class CLI {
 
             switch (cmd) {
                 case "ls":
-                    if (cmdArgs.length > 0 && cmdArgs[0].equals("-a")) {
+                    ls();
+                    /*if (cmdArgs.length > 0 && cmdArgs[0].equals("-a")) {
                         String files = listAllFiles();
                         boolean op = false;
                         for (int i = 1; i < cmdArgs.length;  i++){
@@ -34,6 +36,23 @@ public class CLI {
                             System.out.println(files);
 
                         System.out.println("Print done\n");
+                    }*/
+                    break;
+                case "rmdir":
+                    if (cmdArgs.length > 0) {
+                        removeDirectory(cmdArgs[0]);
+                    } else {
+                        System.out.println("Usage: rmdir <directory_name>");
+                    }
+                    break;
+                case "help":
+                    showHelp();
+                    break;
+                case "cat":
+                    if (cmdArgs.length > 0) {
+                        cat(cmdArgs);
+                    } else {
+                        System.out.println("Usage: cat <file1> <file2> ...");
                     }
                     break;
                 case "touch":
@@ -91,6 +110,95 @@ public class CLI {
             System.err.println("Error writing to file: " + e.getMessage());
             return false;
         }
+    }
+    public static void ls() {
+        // Get the current directory
+        File currentDir = new File(".");
+
+        // List all files in the current directory
+        File[] files = currentDir.listFiles();
+
+        if (files == null) {
+            System.out.println("Could not list files.");
+            return;
+        }
+
+        // Sort files alphabetically
+        Arrays.sort(files);
+
+        // Display each non-hidden file name
+        for (File file : files) {
+            if (!file.isHidden()) { // Skip hidden files
+                System.out.println(file.getName());
+            }
+        }
+    }
+    public static void removeDirectory(String directoryName) {
+        File dir = new File(directoryName);
+
+        // Check if the directory exists
+        if (!dir.exists()) {
+            System.out.println("Error: Directory '" + directoryName + "' does not exist.");
+            return;
+        }
+
+        // Check if it is actually a directory
+        if (!dir.isDirectory()) {
+            System.out.println("Error: '" + directoryName + "' is not a directory.");
+            return;
+        }
+
+        // Check if the directory is empty
+        String[] files = dir.list();
+        if (files != null && files.length > 0) {
+            System.out.println("Error: Directory '" + directoryName + "' is not empty.");
+            return;
+        }
+
+        // Try to delete the empty directory
+        if (dir.delete()) {
+            System.out.println("Directory removed successfully.");
+        } else {
+            System.out.println("Failed to remove directory.");
+        }
+    }
+    public static void cat(String[] fileNames) {
+        for (String fileName : fileNames) {
+            File file = new File(fileName);
+
+            if (!file.exists()) {
+                System.out.println("Error: File '" + fileName + "' does not exist.");
+                continue;  // Skip to the next file if this one doesn't exist
+            }
+
+            System.out.println("Contents of " + fileName + ":");
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } catch (IOException e) {
+                System.out.println("Error reading file " + fileName + ": " + e.getMessage());
+            }
+            System.out.println();  // Separate contents of different files with a newline
+        }
+    }
+    public static void showHelp() {
+        System.out.println("Available commands:");
+        System.out.println("pwd       - Print the current working directory.");
+        System.out.println("cd <dir>  - Change the directory to <dir>.");
+        System.out.println("ls        - List files and directories in the current directory.");
+        System.out.println("ls -a     - List all files, including hidden ones, in the current directory.");
+        System.out.println("ls -r     - List files in reverse alphabetical order.");
+        System.out.println("mkdir <dir> - Create a new directory named <dir>.");
+        System.out.println("rmdir <dir> - Remove an empty directory named <dir>.");
+        System.out.println("touch <file> - Create a new file named <file> or update its timestamp.");
+        System.out.println("mv <src> <dest> - Move or rename a file from <src> to <dest>.");
+        System.out.println("rm <file> - Delete the specified file.");
+        System.out.println("cat <file1> <file2> ... - Display contents of files in sequence.");
+        System.out.println("> <file> - Redirect output to a file, overwriting the file.");
+        System.out.println(">> <file> - Append output to a file.");
+        System.out.println("| - Pipe the output of one command as input to another command.");
     }
 
 }
