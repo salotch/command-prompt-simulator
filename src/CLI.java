@@ -24,11 +24,6 @@ public class CLI {
             return;
         }
 
-        if ("help".equalsIgnoreCase(commandName)){
-            showHelp();
-            return;
-        }
-
         // Check for redirection operators
         if (input.contains(">")  || input.contains(">>")) {
             boolean append = input.contains(">>");
@@ -51,6 +46,11 @@ public class CLI {
             if ("exit".equalsIgnoreCase(input)) {
                 System.out.println("Exiting CLI.");
                 break;
+            }
+
+            if ("help".equalsIgnoreCase(input)){
+                showHelp();
+                return;
             }
 
             executeCommand(input);
