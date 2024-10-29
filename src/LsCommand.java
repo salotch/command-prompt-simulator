@@ -42,6 +42,8 @@ public class LsCommand implements Command {
             return;
         }
 
+        // Put array sort line here Alaa
+
         // Print the result to the console
         System.out.print(output.toString());
 
@@ -53,7 +55,6 @@ public class LsCommand implements Command {
     private void parseArguments(String[] args) {
 
         for (String arg : args) {
-            System.out.println(arg);
             if (arg.equals("-a")) {
                 showHidden = true; // Enable hidden files display
             } else if (arg.equals("-r")){
