@@ -22,21 +22,7 @@ public class CLI {
             switch (cmd) {
                 case "ls":
                     ls();
-                    /*if (cmdArgs.length > 0 && cmdArgs[0].equals("-a")) {
-                        String files = listAllFiles();
-                        boolean op = false;
-                        for (int i = 1; i < cmdArgs.length;  i++){
-                            if (cmdArgs[i].contains(">")){
-                                redirectToFile(files, cmdArgs[i+1]);
-                                op = true;
-                                break;
-                            }
-                        }
-                        if(!op)
-                            System.out.println(files);
 
-                        System.out.println("Print done\n");
-                    }*/
                     break;
                 case "rmdir":
                     if (cmdArgs.length > 0) {
