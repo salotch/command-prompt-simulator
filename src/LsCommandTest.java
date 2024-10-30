@@ -16,7 +16,8 @@ public class LsCommandTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        lsCommand = new LsCommand();
+        CLI.setPath(new File("").getAbsolutePath());
+        lsCommand = new LsCommand(CLI.currentPathList);
 
         // Create test directory and files
         File testDir = new File(TEST_DIR);
