@@ -6,6 +6,7 @@ public class LsCommand implements Command {
     private boolean showHidden = false;
     private boolean recursive = false;
     private String directoryPath = ".";
+    private StringBuilder output = new StringBuilder();  // Store output here for testing
 
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
@@ -19,19 +20,25 @@ public class LsCommand implements Command {
         this.directoryPath = directoryPath;
     }
 
+    // Getter to retrieve the output for testing
+    public String getOutput() {
+        return output.toString();
+    }
+
     @Override
     public void execute(String[] args) {
+        // Clear previous output for fresh execution
+        output.setLength(0);
+
         // Parse arguments
         parseArguments(args);
 
         // Start listing files
         File directory = new File(directoryPath);
         if (!directory.isDirectory()) {
-            System.out.println("Error: " + directoryPath + " is not a directory.");
+            output.append("Error: ").append(directoryPath).append(" is not a directory.\n");
             return;
         }
-
-        StringBuilder output = new StringBuilder();
 
         // List files with recursive option if required
         listFiles(directory, 0, output);
@@ -51,7 +58,10 @@ public class LsCommand implements Command {
                 showHidden = true;
             } else if (arg.equals("-r")) {
                 recursive = true;
-            } else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
+            } else if (arg.equals("-ra") || arg.equals("-ar")) {    // For both recursive and hidden
+                showHidden = true;
+                recursive = true;
+            }  else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
                 directoryPath = arg;  // Assume it's a directory path if not a flag or redirection
             } else if (arg.equals(">") || arg.equals(">>") || arg.equals("|")) {
                 break;
@@ -66,13 +76,12 @@ public class LsCommand implements Command {
         // List files and directories in the current directory
         File[] files = directory.listFiles();
         if (files == null) {
-            System.out.println("Unable to access directory: " + directory.getPath());
+            output.append("Unable to access directory: ").append(directory.getPath()).append("\n");
             return;
         }
 
         for (File file : files) {
             if (showHidden || !file.isHidden()) {
-                //System.out.println(indent + file.getName());
                 output.append(indent).append(file.getName()).append("\n");
 
                 // Recurse if the file is a directory and -r is enabled
@@ -83,39 +92,3 @@ public class LsCommand implements Command {
         }
     }
 }
-
-
-/*    public void execute(String[] args) {
-        // Parse arguments to set options
-        parseArguments(args);
-
-        // Create a file object for the specified directory
-        File directory = new File(directoryPath);
-        if (!directory.isDirectory()) {
-            System.out.println("Error: " + directoryPath + " is not a directory.");
-            return;
-        }
-
-        // List files based on the `showHidden` flag
-        StringBuilder output = new StringBuilder(); // ----------------------------
-        File[] files = directory.listFiles();
-
-        if (files != null) {
-            for (File file : files) {
-                if (showHidden || !file.isHidden()) {
-                    output.append(file.getName()).append("\n");
-                }
-            }
-        } else {
-            System.out.println("Error: Unable to access directory contents.");
-            return;
-        }
-
-        // Put array sort line here Alaa
-
-        // Print the result to the console
-        System.out.print(output.toString());
-
-        // Returning to current directory
-        directoryPath = ".";
-    }*/

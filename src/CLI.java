@@ -38,7 +38,7 @@ public class CLI {
 
     public void start() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the CLI. Type 'help' to show available commands and thier usage, Type 'exit' to quit.");
+        System.out.println("Welcome to the CLI. Type 'help' to show available commands and their usage, Type 'exit' to quit.");
 
         while (true) {
             System.out.print("> ");
