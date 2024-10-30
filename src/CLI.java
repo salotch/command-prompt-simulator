@@ -38,7 +38,7 @@ public class CLI {
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
         commandMap.put("cd", new CdCommand());
-        commandMap.put("mkdir", new MkDirCommand());
+        commandMap.put("mkdir", new MkDirCommand(currentPathList));
         // Add other commands here
     }
 
