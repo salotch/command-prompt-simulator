@@ -55,6 +55,9 @@ public class CLI {
                 System.out.println("Error: No filename provided after redirection operator.");
                 return;  // Exit the method, prompting the user to enter a new command
             }
+            if (input.contains("cat >") && parts.length == 3){
+                System.out.println("Please type 'exit' to finish:");
+            }
 
             String fileName = parts[parts.length - 1];
 
@@ -83,7 +86,7 @@ public class CLI {
                     System.out.print("> ");
             }
 
-            
+
             String input = scanner.nextLine().trim();
 
             if ("exit".equalsIgnoreCase(input)) {

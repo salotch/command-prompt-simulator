@@ -54,7 +54,6 @@ public class CatCommand implements Command {
     }
 
     private void readFromUserInput() {
-        System.out.println("Enter text (type 'exit' to finish):");
         Scanner scanner = new Scanner(System.in); // Do not close this Scanner
         StringBuilder inputBuilder = new StringBuilder();
 
@@ -64,7 +63,7 @@ public class CatCommand implements Command {
         }
 
         // Print the input received from the user
-        System.out.println("You entered:");
+        //System.out.println("You entered:");
         System.out.print(inputBuilder.toString());
         // Do not close the scanner here
     }
