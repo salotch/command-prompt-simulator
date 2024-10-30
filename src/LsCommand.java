@@ -4,67 +4,91 @@ import java.util.List;
 
 public class LsCommand implements Command {
     private boolean showHidden = false;
+    private boolean recursive = false;
     private String directoryPath = ".";
+    private StringBuilder output = new StringBuilder();  // Store output here for testing
 
-    // Methods to configure options
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
+    }
+
+    public void setRecursive(boolean recursive) {
+        this.recursive = recursive;
     }
 
     public void setDirectoryPath(String directoryPath) {
         this.directoryPath = directoryPath;
     }
 
+    // Getter to retrieve the output for testing
+    public String getOutput() {
+        return output.toString();
+    }
+
     @Override
     public void execute(String[] args) {
-        // Parse arguments to set options
+        // Clear previous output for fresh execution
+        output.setLength(0);
+
+        // Parse arguments
         parseArguments(args);
 
-        // Create a file object for the specified directory
+        // Start listing files
         File directory = new File(directoryPath);
         if (!directory.isDirectory()) {
-            System.out.println("Error: " + directoryPath + " is not a directory.");
+            output.append("Error: ").append(directoryPath).append(" is not a directory.\n");
             return;
         }
 
-        // List files based on the `showHidden` flag
-        StringBuilder output = new StringBuilder();
-        File[] files = directory.listFiles();
-
-        if (files != null) {
-            for (File file : files) {
-                if (showHidden || !file.isHidden()) {
-                    output.append(file.getName()).append("\n");
-                }
-            }
-        } else {
-            System.out.println("Error: Unable to access directory contents.");
-            return;
-        }
+        // List files with recursive option if required
+        listFiles(directory, 0, output);
 
         // Print the result to the console
         System.out.print(output.toString());
 
-        // Returning to current directory
+        // Reset flags for next command execution
+        showHidden = false;
+        recursive = false;
         directoryPath = ".";
     }
 
-    // Helper method to parse command arguments
     private void parseArguments(String[] args) {
-
         for (String arg : args) {
-            System.out.println(arg);
             if (arg.equals("-a")) {
-                showHidden = true; // Enable hidden files display
-            } else if (arg.equals("-r")){
-                // code for ls -r
-                continue;
-            }else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
-                // If it's not a redirection or pipe symbol, assume it's a directory path
-                directoryPath = arg;
+                showHidden = true;
+            } else if (arg.equals("-r")) {
+                recursive = true;
+            } else if (arg.equals("-ra") || arg.equals("-ar")) {    // For both recursive and hidden
+                showHidden = true;
+                recursive = true;
+            }  else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
+                directoryPath = arg;  // Assume it's a directory path if not a flag or redirection
+            } else if (arg.equals(">") || arg.equals(">>") || arg.equals("|")) {
+                break;
             }
         }
-
     }
 
+    private void listFiles(File directory, int depth, StringBuilder output) {
+        // Indentation to reflect directory depth for recursive display
+        String indent = "  ".repeat(depth);
+
+        // List files and directories in the current directory
+        File[] files = directory.listFiles();
+        if (files == null) {
+            output.append("Unable to access directory: ").append(directory.getPath()).append("\n");
+            return;
+        }
+
+        for (File file : files) {
+            if (showHidden || !file.isHidden()) {
+                output.append(indent).append(file.getName()).append("\n");
+
+                // Recurse if the file is a directory and -r is enabled
+                if (file.isDirectory() && recursive) {
+                    listFiles(file, depth + 1, output);
+                }
+            }
+        }
+    }
 }
