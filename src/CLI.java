@@ -25,11 +25,6 @@ public class CLI {
             return;
         }
 
-        if ("help".equalsIgnoreCase(commandName)){
-            showHelp();
-            return;
-        }
-
         // Check for redirection operators
         if (input.contains(">")  || input.contains(">>")) {
             boolean append = input.contains(">>");
@@ -43,7 +38,7 @@ public class CLI {
 
     public void start() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the CLI. Type 'help' to show available commands and thier usage, Type 'exit' to quit.");
+        System.out.println("Welcome to the CLI. Type 'help' to show available commands and their usage, Type 'exit' to quit.");
 
         while (true) {
             System.out.print("> ");
@@ -52,6 +47,10 @@ public class CLI {
             if ("exit".equalsIgnoreCase(input)) {
                 System.out.println("Exiting CLI.");
                 break;
+            }
+
+            if ("help".equalsIgnoreCase(input)){
+                showHelp();
             }
 
             executeCommand(input);
