@@ -7,6 +7,7 @@ public class CLI {
 
     public CLI() {
         commandMap = new HashMap<>();
+        commandMap.put("help", new HelpCommand());
         commandMap.put("ls", new LsCommand());
         commandMap.put("touch", new TouchCommand());
         commandMap.put("rmdir", new RmdirCommand());
@@ -37,7 +38,7 @@ public class CLI {
 
     public void start() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the CLI. Type 'exit' to quit.");
+        System.out.println("Welcome to the CLI. Type 'help' to show available commands and thier usage, Type 'exit' to quit.");
 
         while (true) {
             System.out.print("> ");
