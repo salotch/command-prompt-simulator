@@ -63,9 +63,9 @@ public class LsCommand implements Command {
                 recursive = true;
             }  else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
                 directoryPath = arg;  // Assume it's a directory path if not a flag or redirection
-            } else if (arg.equals(">") || arg.equals(">>") || arg.equals("|")) {
+            }/* else if (arg.equals(">") || arg.equals(">>") || arg.equals("|")) {
                 break;
-            }
+            }*/
         }
     }
 

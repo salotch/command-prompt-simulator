@@ -46,4 +46,26 @@ class RedirectionCommandTest {
         String content = Files.readString(Path.of(TEST_FILE));
         assertEquals("Initial content\nSample output", content, "File should append 'Sample output' to 'Initial content'");
     }
+    @Test
+    void testMissingFilenameRedirection() {
+        // Initialize the outputStreamCaptor before executing the command
+        ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(outputStreamCaptor));  // Capture output for testing
+
+        try {
+            // Simulate command input without a filename
+            CLI cli = new CLI();
+            cli.executeCommand("cat >");  // Missing filename after >
+
+            // Verify that the error message was printed
+            assertTrue(outputStreamCaptor.toString().contains("Error: No filename provided after redirection operator."),
+                    "Should prompt an error when no filename is provided after redirection operator.");
+        } finally {
+            // Restore original System.out after the test
+            System.setOut(originalOut);
+        }
+    }
+
+
 }
