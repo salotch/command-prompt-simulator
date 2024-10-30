@@ -38,7 +38,7 @@ public class CLI {
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
         commandMap.put("cd", new CdCommand());
-        commandMap.put("mkdir", new MkDirCommand());
+        commandMap.put("mkdir", new MkDirCommand(currentPathList));
         // Add other commands here
     }
 
@@ -52,14 +52,6 @@ public class CLI {
             return;
         }
 
-// <<<<<<< salma
-//         if ("help".equalsIgnoreCase(commandName)) {
-//             showHelp();
-//             return;
-//         }
-
-// =======
-// >>>>>>> main
         // Check for redirection operators
         if (input.contains(">") || input.contains(">>")) {
             boolean append = input.contains(">>");
@@ -73,13 +65,7 @@ public class CLI {
 
     public void start() {
         Scanner scanner = new Scanner(System.in);
-// <<<<<<< salma
-//         System.out.println(
-//                 "Welcome to the CLI. Type 'help' to show available commands and thier usage, Type 'exit' to quit.");
-// =======
-//         System.out.println("Welcome to the CLI. Type 'help' to show available commands and their usage, Type 'exit' to quit.");
-// >>>>>>> main
-
+        System.out.println("Welcome to the CLI. Type 'help' to show available commands and their usage, Type 'exit' to quit.");
         while (true) {
             for (int i = 0; i < currentPathList.size(); i++) {
                 System.out.print(currentPathList.get(i));
