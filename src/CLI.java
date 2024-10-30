@@ -7,33 +7,26 @@ import java.util.Arrays;
 
 public class CLI {
     private final Map<String, Command> commandMap;
-    public ArrayList<String> currentPathList;
+    public static ArrayList<String> currentPathList;
 
-    void setPath() {
-        // the path as a string of the code in your PC.
-        String path = new File("").getAbsolutePath();
+    public static void setPath(String newPath) {
+        // Use the OS-specific separator but escape if on Windows for regex
+        String separator = File.separator.equals("\\") ? "\\\\" : File.separator;
 
-        String[] pathComponents;
-        try {
-            // to split the path into an array based on the file separator specific to the
-            // operating system of your PC but in windows the regex will prevent it
-            pathComponents = path.split(File.separator);
-        } catch (Exception e) {
-            // split the path into an array using the file separator
-            // escape the backslash for the regex if on Windows
-            pathComponents = path.split("\\\\");
-        }
-        // Convert the array to an ArrayList
+        // Split the newPath based on the OS-specific separator
+        String[] pathComponents = newPath.split(separator);
+
+        // Convert the array to an ArrayList and store it in currentPathList
         currentPathList = new ArrayList<>(Arrays.asList(pathComponents));
-
     }
 
+
     public CLI() {
-        setPath();
+        setPath(new File("").getAbsolutePath());// the path as a string of the code in your PC.
 
         commandMap = new HashMap<>();
         commandMap.put("help", new HelpCommand());
-        commandMap.put("ls", new LsCommand());
+        commandMap.put("ls", new LsCommand(currentPathList));  // Pass currentPathList to LsCommand
         commandMap.put("touch", new TouchCommand());
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
