@@ -24,15 +24,23 @@ public class CLI {
             System.out.println("Command not found");
             return;
         }
+        String[] commandArgs;
 
         // Check for redirection operators
         if (input.contains(">")  || input.contains(">>")) {
             boolean append = input.contains(">>");
             String fileName = parts[parts.length - 1];
+
+            // Filter out the redirection symbol and filename
+            commandArgs = new String[parts.length - 2];
+            System.arraycopy(parts, 0, commandArgs, 0, parts.length - 2);
+
             command = new RedirectionCommand(command, fileName, append);
+            command.execute(commandArgs);
+        }else {
+            // Pass all parts (including arguments and flags) to `execute` method in Command
+            command.execute(parts);
         }
-        // Pass all parts (including arguments and flags) to `execute` method in Command
-        command.execute(parts);
 
     }
 
