@@ -56,6 +56,13 @@ public class CLI {
         // Check for redirection operators
         if (input.contains(">") || input.contains(">>")) {
             boolean append = input.contains(">>");
+
+            // Ensure there's a filename after the redirection operator
+            if (parts.length < 3) {
+                System.out.println("Error: No filename provided after redirection operator.");
+                return;  // Exit the method, prompting the user to enter a new command
+            }
+
             String fileName = parts[parts.length - 1];
 
             // Filter out the redirection symbol and filename
