@@ -51,7 +51,6 @@ public class CLI {
 
             if ("help".equalsIgnoreCase(input)){
                 showHelp();
-                return;
             }
 
             executeCommand(input);

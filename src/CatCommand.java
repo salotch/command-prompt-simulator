@@ -11,10 +11,26 @@ public class CatCommand implements Command {
             return;
         }
 
-        // Remove the first argument ("cat") and pass the rest as file names
+        // Initialize a list for file names
         String[] fileNames = new String[args.length - 1];
-        System.arraycopy(args, 1, fileNames, 0, fileNames.length);
-        cat(fileNames);
+        int fileCount = 0;
+
+        // Process arguments and separate file names from redirection symbols
+        for (int i = 1; i < args.length; i++) {
+            if (args[i].equals(">") || args[i].equals(">>") || args[i].equals("|")) {
+                // Stop processing once we hit a redirection or pipe symbol
+                break;
+            } else {
+                fileNames[fileCount++] = args[i];
+            }
+        }
+
+        // Create a new array with the actual file names
+        String[] finalFileNames = new String[fileCount];
+        System.arraycopy(fileNames, 0, finalFileNames, 0, fileCount);
+
+        cat(finalFileNames);
+
     }
 
     private void cat(String[] fileNames) {
