@@ -2,12 +2,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class CatCommand implements Command {
     @Override
     public void execute(String[] args) {
         if (args.length < 2) {
-            System.out.println("Usage: cat <file_name1> <file_name2> ...");
+            // If no arguments are provided, read from user input
+            readFromUserInput();
             return;
         }
 
@@ -30,7 +32,6 @@ public class CatCommand implements Command {
         System.arraycopy(fileNames, 0, finalFileNames, 0, fileCount);
 
         cat(finalFileNames);
-
     }
 
     private void cat(String[] fileNames) {
@@ -41,8 +42,6 @@ public class CatCommand implements Command {
                 System.out.println("Error: File '" + fileName + "' does not exist.");
                 continue;  // Skip to the next file if this one doesn't exist
             }
-
-            System.out.println("Contents of " + fileName + ":");
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -51,8 +50,22 @@ public class CatCommand implements Command {
             } catch (IOException e) {
                 System.out.println("Error reading file " + fileName + ": " + e.getMessage());
             }
-            System.out.println();  // Separate contents of different files with a newline
         }
+    }
+
+    private void readFromUserInput() {
+        Scanner scanner = new Scanner(System.in); // Do not close this Scanner
+        StringBuilder inputBuilder = new StringBuilder();
+
+        String line;
+        while (!(line = scanner.nextLine()).equals("exit")) {
+            inputBuilder.append(line).append(System.lineSeparator());
+        }
+
+        // Print the input received from the user
+        //System.out.println("You entered:");
+        System.out.print(inputBuilder.toString());
+        // Do not close the scanner here
     }
 
 }

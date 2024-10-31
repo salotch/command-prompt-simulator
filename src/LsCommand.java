@@ -3,10 +3,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LsCommand implements Command {
+    private final ArrayList<String> currentPathList;
     private boolean showHidden = false;
     private boolean recursive = false;
-    private String directoryPath = ".";
-    private StringBuilder output = new StringBuilder();  // Store output here for testing
+    private String directoryPath;
+    private final StringBuilder output = new StringBuilder();  // Store output for testing
+
+    public LsCommand(ArrayList<String> currentPathList) {
+        this.currentPathList = currentPathList;
+        this.directoryPath = String.join(File.separator, currentPathList); // Set initial directory path
+    }
 
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
@@ -16,10 +22,6 @@ public class LsCommand implements Command {
         this.recursive = recursive;
     }
 
-    public void setDirectoryPath(String directoryPath) {
-        this.directoryPath = directoryPath;
-    }
-
     // Getter to retrieve the output for testing
     public String getOutput() {
         return output.toString();
@@ -27,29 +29,24 @@ public class LsCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        // Clear previous output for fresh execution
-        output.setLength(0);
+        output.setLength(0);  // Clear previous output for fresh execution
+        parseArguments(args);  // Parse any flags or directory path arguments
 
-        // Parse arguments
-        parseArguments(args);
-
-        // Start listing files
         File directory = new File(directoryPath);
         if (!directory.isDirectory()) {
             output.append("Error: ").append(directoryPath).append(" is not a directory.\n");
+            System.out.print(output);
             return;
         }
 
         // List files with recursive option if required
         listFiles(directory, 0, output);
+        System.out.print(output);
 
-        // Print the result to the console
-        System.out.print(output.toString());
-
-        // Reset flags for next command execution
+        // Reset flags and directory path for the next command execution
         showHidden = false;
         recursive = false;
-        directoryPath = ".";//directoryPath = System.getProperty("user.dir");
+        directoryPath = String.join(File.separator, currentPathList);  // Reset to default path
     }
 
     private void parseArguments(String[] args) {
@@ -58,23 +55,20 @@ public class LsCommand implements Command {
                 showHidden = true;
             } else if (arg.equals("-r")) {
                 recursive = true;
-            } else if (arg.equals("-ra") || arg.equals("-ar")) {    // For both recursive and hidden
+            } else if (arg.equals("-ra") || arg.equals("-ar")) {  // For both recursive and hidden
                 showHidden = true;
                 recursive = true;
-            }  else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
-                directoryPath = arg;  // Assume it's a directory path if not a flag or redirection
-            } else if (arg.equals(">") || arg.equals(">>") || arg.equals("|")) {
-                break;
+            } else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
+                // Assume it’s a directory path if it's not a flag or redirection
+                directoryPath = arg;
             }
         }
     }
 
     private void listFiles(File directory, int depth, StringBuilder output) {
-        // Indentation to reflect directory depth for recursive display
-        String indent = "  ".repeat(depth);
-
-        // List files and directories in the current directory
+        String indent = "  ".repeat(depth);  // Indentation for recursive display
         File[] files = directory.listFiles();
+
         if (files == null) {
             output.append("Unable to access directory: ").append(directory.getPath()).append("\n");
             return;
@@ -84,7 +78,7 @@ public class LsCommand implements Command {
             if (showHidden || !file.isHidden()) {
                 output.append(indent).append(file.getName()).append("\n");
 
-                // Recurse if the file is a directory and -r is enabled
+                // Recurse if it's a directory and -r is enabled
                 if (file.isDirectory() && recursive) {
                     listFiles(file, depth + 1, output);
                 }
