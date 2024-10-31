@@ -3,12 +3,12 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class CLI {
-    private final Map<String, Command> commandMap;
+    protected final Map<String, Command> commandMap;
     public CLI() {
 
         commandMap = new HashMap<>();
         commandMap.put("help", new HelpCommand());
-        commandMap.put("ls", new LsCommand());  // Pass currentPathList to LsCommand
+        commandMap.put("ls", new LsCommand());
         commandMap.put("touch", new TouchCommand());
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
@@ -18,14 +18,25 @@ public class CLI {
         commandMap.put("mkdir", new MkDirCommand());
         commandMap.put("pwd", new PwdCommand());
         commandMap.put("more", new MoreCommand());
+        commandMap.put("unique", new UniqueCommand());
+        commandMap.put("|", new PipeCommand());
         // Add other commands here
     }
 
     public void executeCommand(String input) {
         String[] parts = input.split(" ");
-        String commandName = parts[0];
-        Command command = commandMap.get(commandName);
 
+        String commandName;
+        Command command;
+        if (input.contains("|")) {
+
+            commandName = parts[1];
+            command = commandMap.get(commandName);
+
+        } else {
+            commandName = parts[0];
+            command = commandMap.get(commandName);
+        }
         if (command == null) {
             System.out.println("Command not found");
             return;
