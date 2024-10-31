@@ -49,7 +49,7 @@ public class LsCommand implements Command {
         // Reset flags for next command execution
         showHidden = false;
         recursive = false;
-        directoryPath = ".";
+        directoryPath = ".";//directoryPath = System.getProperty("user.dir");
     }
 
     private void parseArguments(String[] args) {
