@@ -112,22 +112,13 @@ public class RmdirCommandTest {
     @Test
     public void testNoArgumentsProvided() {
         String[] args = {"rmdir"};
-        // Capture standard output
         ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
-        PrintStream originalOut = System.out;
         System.setOut(new PrintStream(outputStreamCaptor));
-        try {
-            RmdirCommand rmdirCommand = new RmdirCommand(); // Instantiate the command
-            rmdirCommand.execute(args);
-            System.out.flush(); // Flush the output stream to capture all output
-            // Define the expected message
-            String expectedMessage = "Usage: rmdir <directory_name1> <directory_name2> ...\r\n"; // Include newline if your command outputs it
-            // Assert that the output matches the expected message
-            assertEquals(expectedMessage, outputStreamCaptor.toString(), "Should display usage message if no arguments are provided.");
-        } finally {
-            // Restore original System.out
-            System.setOut(originalOut);
-        }
+        rmdirCommand.execute(args);
+        System.err.flush();
+        String expectedMessage = "Usage: rmdir <directory_name1> <directory_name2> ...\r\n";
+        assertEquals(expectedMessage, outputStreamCaptor.toString());
+
     }
 
 

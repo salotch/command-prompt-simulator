@@ -42,15 +42,10 @@ public class CatCommandTest {
 
     @Test
     public void testCatWithExistingFile() throws IOException {
-        // Arrange
+
         String[] args = {"cat", testFile.getAbsolutePath()};
-
-        // Check if the test file exists
         assertTrue(testFile.exists(), "Test file should exist");
-
-        // Act
         catCommand.execute(args);
-
         String expectedOutput = "Line 1" + System.lineSeparator() + "Line 2" + System.lineSeparator();
         assertEquals(expectedOutput, outContent.toString());
 
@@ -59,37 +54,24 @@ public class CatCommandTest {
 
     @Test
     public void testCatWithNonExistentFile() {
-        // Arrange
         String[] args = {"cat", nonExistentFile.getAbsolutePath()};
-
-        // Act
         catCommand.execute(args);
-
-        // Assert
         String expectedError = "Error: File '" + nonExistentFile.getAbsolutePath() + "' does not exist." + System.lineSeparator();
         assertTrue(outContent.toString().contains(expectedError), "Should display an error for a non-existent file.");
     }
 
     @Test
     public void testCatWithMultipleFiles() throws IOException {
-        // Arrange
         File anotherTestFile = File.createTempFile("anotherTestFile", ".txt");
         try (PrintWriter writer = new PrintWriter(new FileWriter(anotherTestFile))) {
             writer.println("Another Line 1");
             writer.println("Another Line 2");
         }
-
         String[] args = {"cat", testFile.getAbsolutePath(), anotherTestFile.getAbsolutePath()};
-
-        // Act
         catCommand.execute(args);
-
-        // Assert with platform-independent line separator
         String expectedOutput = "Line 1" + System.lineSeparator() + "Line 2" + System.lineSeparator() +
                 "Another Line 1" + System.lineSeparator() + "Another Line 2" + System.lineSeparator();
         assertEquals(expectedOutput, outContent.toString(), "Should display contents of both files sequentially.");
-
-        // Cleanup
         if (anotherTestFile.exists()) {
             anotherTestFile.delete();
         }
