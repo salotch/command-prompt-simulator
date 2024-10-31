@@ -3,16 +3,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LsCommand implements Command {
-    private final ArrayList<String> currentPathList;
     private boolean showHidden = false;
     private boolean recursive = false;
+    private boolean reverse= false;
     private String directoryPath;
     private final StringBuilder output = new StringBuilder();  // Store output for testing
 
-    public LsCommand(ArrayList<String> currentPathList) {
-        this.currentPathList = currentPathList;
-        this.directoryPath = String.join(File.separator, currentPathList); // Set initial directory path
-    }
 
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
@@ -29,10 +25,12 @@ public class LsCommand implements Command {
 
     @Override
     public void execute(String[] args) {
+        String directoryPath =System.getProperty("user.dir");
+        File directory = new File(directoryPath);
         output.setLength(0);  // Clear previous output for fresh execution
         parseArguments(args);  // Parse any flags or directory path arguments
 
-        File directory = new File(directoryPath);
+        
         if (!directory.isDirectory()) {
             output.append("Error: ").append(directoryPath).append(" is not a directory.\n");
             System.out.print(output);
@@ -46,16 +44,21 @@ public class LsCommand implements Command {
         // Reset flags and directory path for the next command execution
         showHidden = false;
         recursive = false;
-        directoryPath = String.join(File.separator, currentPathList);  // Reset to default path
+        reverse = false;
+        // directoryPath = System.getProperty("user.dir") ; // Reset to default path
     }
 
     private void parseArguments(String[] args) {
         for (String arg : args) {
             if (arg.equals("-a")) {
                 showHidden = true;
-            } else if (arg.equals("-r")) {
+
+            }else if(arg.equals("-r")){
+                reverse=true;
+            }
+            else if (arg.equals("-R")) {
                 recursive = true;
-            } else if (arg.equals("-ra") || arg.equals("-ar")) {  // For both recursive and hidden
+            } else if (arg.equals("-Ra") || arg.equals("-aR")) {  // For both recursive and hidden
                 showHidden = true;
                 recursive = true;
             } else if (!arg.equals(">") && !arg.equals(">>") && !arg.equals("|") && !arg.equals("ls")) {
@@ -72,8 +75,14 @@ public class LsCommand implements Command {
         if (files == null) {
             output.append("Unable to access directory: ").append(directory.getPath()).append("\n");
             return;
-        }
-
+        }if(reverse){
+            for(int i= files.length -1;i>=0;--i){
+                if (showHidden || !files[i].isHidden()) {
+                output.append(indent).append(files[i].getName()).append("\n");
+                if (files[i].isDirectory() && recursive) {
+                    listFiles(files[i], depth + 1, output);
+                }
+            }}}else{
         for (File file : files) {
             if (showHidden || !file.isHidden()) {
                 output.append(indent).append(file.getName()).append("\n");
@@ -84,5 +93,6 @@ public class LsCommand implements Command {
                 }
             }
         }
+    }
     }
 }

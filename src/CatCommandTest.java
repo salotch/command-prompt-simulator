@@ -1,83 +1,103 @@
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import java.io.*;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.nio.file.Files;
 
 public class CatCommandTest {
 
     private CatCommand catCommand;
-    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+    private File testFile;
+    private File nonExistentFile;
 
     @BeforeEach
-    public void setUp() {
-        catCommand = new CatCommand();
-        System.setOut(new PrintStream(outputStream)); // Redirect System.out to capture print statements
+    public void setUp() throws IOException {
+       catCommand = new CatCommand();
+        System.setOut(new PrintStream(outContent)); // Capture console output for assertions
+
+        // Create a temporary test file with sample content
+        testFile = File.createTempFile("testFile", ".txt");
+        try (PrintWriter writer = new PrintWriter(new FileWriter(testFile))) {
+            writer.println("Line 1");
+            writer.println("Line 2");
+        }
+
+        // Non-existent file for testing error handling
+        nonExistentFile = new File("nonexistentfile.txt");
+
+        // Clear outContent between tests
+        outContent.reset();
     }
 
     @AfterEach
     public void tearDown() {
-        // Clean up files created during testing
-        File testFile1 = new File("testfile1.txt");
-        File testFile2 = new File("testfile2.txt");
-        if (testFile1.exists()) testFile1.delete();
-        if (testFile2.exists()) testFile2.delete();
-
-        System.setOut(System.out); // Reset standard output
-        outputStream.reset(); // Clear output stream after each test
-    }
-
-    @Test
-    public void testDisplayFileContents() throws IOException {
-        outputStream.reset(); // Clear any previous output
-
-        // Arrange
-        File testFile = new File("testfile1.txt");
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(testFile))) {
-            writer.write("Hello, world!\nThis is a test file.");
+        System.setOut(System.out); // Restore console output
+        System.setIn(System.in); // Restore System.in
+        if (testFile.exists()) {
+            testFile.delete();
         }
-
-        String[] args = {"cat", "testfile1.txt"};
-
-        // Act
-        catCommand.execute(args);
-
-        // Assert
-        String output = outputStream.toString();
-        System.out.println("Output for testDisplayFileContents: \n" + output); // Show output in console
-        assertTrue(output.contains("Contents of testfile1.txt:"), "Output should contain file header.");
-        assertTrue(output.contains("Hello, world!"), "Output should contain the first line of the file.");
-        assertTrue(output.contains("This is a test file."), "Output should contain the second line of the file.");
     }
 
     @Test
-    public void testFileDoesNotExist() {
-        outputStream.reset(); // Clear any previous output
+    public void testCatWithExistingFile() throws IOException {
 
-        // Arrange
-        String[] args = {"cat", "nonexistent.txt"};
-
-        // Act
+        String[] args = {"cat", testFile.getAbsolutePath()};
+        assertTrue(testFile.exists(), "Test file should exist");
         catCommand.execute(args);
+        String expectedOutput = "Line 1" + System.lineSeparator() + "Line 2" + System.lineSeparator();
+        assertEquals(expectedOutput, outContent.toString());
 
-        // Assert
-        String output = outputStream.toString();
-        System.out.println("Output for testFileDoesNotExist: \n" + output); // Show output in console
-        assertTrue(output.contains("Error: File 'nonexistent.txt' does not exist."), "Output should indicate the file does not exist.");
+    }
+
+
+    @Test
+    public void testCatWithNonExistentFile() {
+        String[] args = {"cat", nonExistentFile.getAbsolutePath()};
+        catCommand.execute(args);
+        String expectedError = "Error: File '" + nonExistentFile.getAbsolutePath() + "' does not exist." + System.lineSeparator();
+        assertTrue(outContent.toString().contains(expectedError), "Should display an error for a non-existent file.");
     }
 
     @Test
-    public void testNoFilenameProvided() {
-        outputStream.reset(); // Clear any previous output
+    public void testCatWithMultipleFiles() throws IOException {
+        File anotherTestFile = File.createTempFile("anotherTestFile", ".txt");
+        try (PrintWriter writer = new PrintWriter(new FileWriter(anotherTestFile))) {
+            writer.println("Another Line 1");
+            writer.println("Another Line 2");
+        }
+        String[] args = {"cat", testFile.getAbsolutePath(), anotherTestFile.getAbsolutePath()};
+        catCommand.execute(args);
+        String expectedOutput = "Line 1" + System.lineSeparator() + "Line 2" + System.lineSeparator() +
+                "Another Line 1" + System.lineSeparator() + "Another Line 2" + System.lineSeparator();
+        assertEquals(expectedOutput, outContent.toString(), "Should display contents of both files sequentially.");
+        if (anotherTestFile.exists()) {
+            anotherTestFile.delete();
+        }
+    }
 
+    @Test
+    public void testCatWithNoArguments() {
         // Arrange
         String[] args = {"cat"};
 
+        // Simulate user input for the readFromUserInput() method
+        InputStream originalIn = System.in;
+        String simulatedInput = "Test line 1\nTest line 2\nexit\n";
+        System.setIn(new ByteArrayInputStream(simulatedInput.getBytes()));
+
         // Act
         catCommand.execute(args);
 
-        // Assert
-        String output = outputStream.toString();
-        System.out.println("Output for testNoFilenameProvided: \n" + output); // Show output in console
-        assertTrue(output.contains("Usage: cat <file_name1> <file_name2> ..."), "Output should show usage information.");
+        // Restore System.in
+        System.setIn(originalIn);
+
+        // Assert with platform-independent line separator
+        String expectedOutput = "Enter text (type 'exit' to finish):" + System.lineSeparator() +
+                "You entered:" + System.lineSeparator() +
+                "Test line 1" + System.lineSeparator() +
+                "Test line 2" + System.lineSeparator();
+        assertEquals(expectedOutput, outContent.toString(), "Should display the user input when no files are provided.");
     }
 }
