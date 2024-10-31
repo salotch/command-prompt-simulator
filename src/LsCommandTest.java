@@ -16,7 +16,6 @@ public class LsCommandTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-
         lsCommand = new LsCommand();
 
         // Create test directory and files
