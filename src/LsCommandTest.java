@@ -79,7 +79,7 @@ public class LsCommandTest {
 
     @Test
     public void testListFilesRecursively() {
-        lsCommand.execute(new String[] {"ls", "-r", TEST_DIR});
+        lsCommand.execute(new String[] {"ls", "-R", TEST_DIR});
         String output = lsCommand.getOutput();
 
         assertTrue(output.contains(VISIBLE_FILE), "Visible file should be listed.");
@@ -88,14 +88,14 @@ public class LsCommandTest {
 
     @Test
     public void testListFilesWithHiddenAndRecursively() {
-        lsCommand.execute(new String[] {"ls", "-ar", TEST_DIR});
+        lsCommand.execute(new String[] {"ls", "-aR", TEST_DIR});
         String output = lsCommand.getOutput();
 
         assertTrue(output.contains(VISIBLE_FILE), "Visible file should be listed.");
         assertTrue(output.contains(HIDDEN_FILE), "Hidden file should be listed with -a flag.");
         assertTrue(output.contains(SUB_FILE), "Subdirectory file should be listed with -r flag.");
 
-        lsCommand.execute(new String[] {"ls", "-ra", TEST_DIR});
+        lsCommand.execute(new String[] {"ls", "-Ra", TEST_DIR});
         output = lsCommand.getOutput();
 
         assertTrue(output.contains(VISIBLE_FILE), "Visible file should be listed.");
