@@ -36,7 +36,8 @@ public class CatCommand implements Command {
 
     private void cat(String[] fileNames) {
         for (String fileName : fileNames) {
-            File file = new File(fileName);
+            String cuurentDir = System.getProperty("user.dir");
+            File file = new File(cuurentDir+"\\"+fileName);
 
             if (!file.exists()) {
                 System.out.println("Error: File '" + fileName + "' does not exist.");

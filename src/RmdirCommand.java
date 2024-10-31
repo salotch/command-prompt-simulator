@@ -14,9 +14,9 @@ public class RmdirCommand implements Command {
             removeDirectory(directoryName);
         }
     }
-
     private void removeDirectory(String directoryName) {
-        File dir = new File(directoryName);
+        String cuurentDir = System.getProperty("user.dir");
+        File dir = new File(cuurentDir+"\\"+directoryName);
 
         // Check if the directory exists
         if (!dir.exists()) {
