@@ -13,8 +13,10 @@ public class CLI {
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
         commandMap.put("cd", new CdCommand());
+        commandMap.put("rm", new RmCommand());
         commandMap.put("cd..", new CdCommand());
         commandMap.put("mkdir", new MkDirCommand());
+        commandMap.put("more", new MoreCommand());
         // Add other commands here
     }
 
