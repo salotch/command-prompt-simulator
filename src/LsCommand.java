@@ -26,12 +26,12 @@ public class LsCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        String directoryPath =System.getProperty("user.dir");
-        File directory = new File(directoryPath);
         output.setLength(0);  // Clear previous output for fresh execution
+        directoryPath =System.getProperty("user.dir");
         parseArguments(args);  // Parse any flags or directory path arguments
+        File directory = new File(directoryPath);
 
-         
+
         if (!directory.isDirectory()) {
             output.append("Error: ").append(directoryPath).append(" is not a directory.\n");
             System.out.print(output);
@@ -51,7 +51,7 @@ public class LsCommand implements Command {
         showHidden = false;
         recursive = false;
         reverse = false;
-        // directoryPath = System.getProperty("user.dir") ; // Reset to default path
+        directoryPath = System.getProperty("user.dir") ; // Reset to default path
     }
 
     private void parseArguments(String[] args) {

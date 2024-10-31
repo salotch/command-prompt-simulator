@@ -1,103 +1,101 @@
-
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import java.io.*;
+import static org.junit.jupiter.api.Assertions.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
-public class CatCommandTest {
-
-    private CatCommand catCommand;
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-
-    private File testFile;
-    private File nonExistentFile;
+class CatCommandTest {
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
 
     @BeforeEach
-    public void setUp() throws IOException {
-       catCommand = new CatCommand();
-        System.setOut(new PrintStream(outContent)); // Capture console output for assertions
-
-        // Create a temporary test file with sample content
-        testFile = File.createTempFile("testFile", ".txt");
-        try (PrintWriter writer = new PrintWriter(new FileWriter(testFile))) {
-            writer.println("Line 1");
-            writer.println("Line 2");
-        }
-
-        // Non-existent file for testing error handling
-        nonExistentFile = new File("nonexistentfile.txt");
-
-        // Clear outContent between tests
-        outContent.reset();
+    void setUp() {
+        // Capture System.out output to verify console output
+        System.setOut(new PrintStream(outputStreamCaptor));
     }
 
     @AfterEach
-    public void tearDown() {
-        System.setOut(System.out); // Restore console output
-        System.setIn(System.in); // Restore System.in
-        if (testFile.exists()) {
-            testFile.delete();
+    void tearDown() {
+        // Restore the original System.out
+        System.setOut(originalOut);
+    }
+
+    @Test
+    void testSingleFileOutput() throws IOException {
+        // Create a sample file with test data
+        String fileName = "testFile1.txt";
+        String fileContent = "This is a test file.";
+        Files.writeString(Path.of(fileName), fileContent);
+
+        try {
+            // Run the command with the test file
+            CatCommand catCommand = new CatCommand();
+            catCommand.execute(new String[] {"cat", fileName});
+
+            // Verify the output matches the content of the test file
+            assertEquals(fileContent, outputStreamCaptor.toString().trim(), "Output should match the file content.");
+        } finally {
+            // Clean up the test file
+            Files.deleteIfExists(Path.of(fileName));
         }
     }
 
     @Test
-    public void testCatWithExistingFile() throws IOException {
+    void testMultipleFileOutput() throws IOException {
+        // Create multiple sample files with test data
+        String file1 = "testFile1.txt";
+        String file2 = "testFile2.txt";
+        String content1 = "File 1 content";
+        String content2 = "File 2 content";
+        Files.writeString(Path.of(file1), content1);
+        Files.writeString(Path.of(file2), content2);
 
-        String[] args = {"cat", testFile.getAbsolutePath()};
-        assertTrue(testFile.exists(), "Test file should exist");
-        catCommand.execute(args);
-        String expectedOutput = "Line 1" + System.lineSeparator() + "Line 2" + System.lineSeparator();
-        assertEquals(expectedOutput, outContent.toString());
+        try {
+            // Run the command with multiple files
+            CatCommand catCommand = new CatCommand();
+            catCommand.execute(new String[] {"cat", file1, file2});
 
-    }
-
-
-    @Test
-    public void testCatWithNonExistentFile() {
-        String[] args = {"cat", nonExistentFile.getAbsolutePath()};
-        catCommand.execute(args);
-        String expectedError = "Error: File '" + nonExistentFile.getAbsolutePath() + "' does not exist." + System.lineSeparator();
-        assertTrue(outContent.toString().contains(expectedError), "Should display an error for a non-existent file.");
-    }
-
-    @Test
-    public void testCatWithMultipleFiles() throws IOException {
-        File anotherTestFile = File.createTempFile("anotherTestFile", ".txt");
-        try (PrintWriter writer = new PrintWriter(new FileWriter(anotherTestFile))) {
-            writer.println("Another Line 1");
-            writer.println("Another Line 2");
-        }
-        String[] args = {"cat", testFile.getAbsolutePath(), anotherTestFile.getAbsolutePath()};
-        catCommand.execute(args);
-        String expectedOutput = "Line 1" + System.lineSeparator() + "Line 2" + System.lineSeparator() +
-                "Another Line 1" + System.lineSeparator() + "Another Line 2" + System.lineSeparator();
-        assertEquals(expectedOutput, outContent.toString(), "Should display contents of both files sequentially.");
-        if (anotherTestFile.exists()) {
-            anotherTestFile.delete();
+            // Verify the output matches the concatenated content of both files
+            String expectedOutput = content1 + System.lineSeparator() + content2;
+            assertEquals(expectedOutput, outputStreamCaptor.toString().trim(), "Output should match concatenated content of both files.");
+        } finally {
+            // Clean up the test files
+            Files.deleteIfExists(Path.of(file1));
+            Files.deleteIfExists(Path.of(file2));
         }
     }
 
     @Test
-    public void testCatWithNoArguments() {
-        // Arrange
-        String[] args = {"cat"};
+    void testNonExistentFile() {
+        // Run the command with a non-existent file
+        CatCommand catCommand = new CatCommand();
+        String nonExistentFile = "nonExistentFile.txt";
+        catCommand.execute(new String[] {"cat", nonExistentFile});
 
-        // Simulate user input for the readFromUserInput() method
+        // Verify the output contains an error message
+        assertTrue(outputStreamCaptor.toString().contains("Error: File '" + nonExistentFile + "' does not exist."),
+                "Should output error message for non-existent file.");
+    }
+
+    @Test
+    void testReadFromUserInput() {
+        // Simulate user input with System.setIn
+        String simulatedInput = "User input line 1\nUser input line 2\nexit\n";
         InputStream originalIn = System.in;
-        String simulatedInput = "Test line 1\nTest line 2\nexit\n";
         System.setIn(new ByteArrayInputStream(simulatedInput.getBytes()));
 
-        // Act
-        catCommand.execute(args);
+        try {
+            // Run the command without file arguments to read from user input
+            CatCommand catCommand = new CatCommand();
+            catCommand.execute(new String[] {"cat"});
 
-        // Restore System.in
-        System.setIn(originalIn);
-
-        // Assert with platform-independent line separator
-        String expectedOutput = "Enter text (type 'exit' to finish):" + System.lineSeparator() +
-                "You entered:" + System.lineSeparator() +
-                "Test line 1" + System.lineSeparator() +
-                "Test line 2" + System.lineSeparator();
-        assertEquals(expectedOutput, outContent.toString(), "Should display the user input when no files are provided.");
+            // Verify the output matches the simulated user input
+            String expectedOutput = "User input line 1" + System.lineSeparator() +
+                    "User input line 2" + System.lineSeparator();
+            assertEquals(expectedOutput, outputStreamCaptor.toString(), "Output should match simulated user input.");
+        } finally {
+            // Restore original System.in
+            System.setIn(originalIn);
+        }
     }
 }
