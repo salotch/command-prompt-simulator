@@ -1,36 +1,11 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.ArrayList;
-import java.io.File;
-import java.util.Arrays;
 
 public class CLI {
     private final Map<String, Command> commandMap;
-    public ArrayList<String> currentPathList;
-
-    void setPath() {
-        // the path as a string of the code in your PC.
-        String path = new File("").getAbsolutePath();
-
-        String[] pathComponents;
-        try {
-            // to split the path into an array based on the file separator specific to the
-            // operating system of your PC but in windows the regex will prevent it
-            pathComponents = path.split(File.separator);
-        } catch (Exception e) {
-            // split the path into an array using the file separator
-            // escape the backslash for the regex if on Windows
-            pathComponents = path.split("\\\\");
-        }
-        // Convert the array to an ArrayList
-        currentPathList = new ArrayList<>(Arrays.asList(pathComponents));
-
-    }
-
+    
     public CLI() {
-        setPath();
-
         commandMap = new HashMap<>();
         commandMap.put("help", new HelpCommand());
         commandMap.put("ls", new LsCommand());
@@ -38,7 +13,8 @@ public class CLI {
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
         commandMap.put("cd", new CdCommand());
-        commandMap.put("mkdir", new MkDirCommand(currentPathList));
+        commandMap.put("cd..", new CdCommand());
+        commandMap.put("mkdir", new MkDirCommand());
         // Add other commands here
     }
 
@@ -65,17 +41,13 @@ public class CLI {
 
     public void start() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the CLI. Type 'help' to show available commands and their usage, Type 'exit' to quit.");
+        System.out.println(
+                "Welcome to the CLI. Type 'help' to show available commands and their usage, Type 'exit' to quit.");
         while (true) {
-            for (int i = 0; i < currentPathList.size(); i++) {
-                System.out.print(currentPathList.get(i));
-                if(i!=currentPathList.size()-1)
-                    System.out.print("\\");
-                else
-                    System.out.print("> ");
-            }
+            String dir = System.getProperty("user.dir");// i put it in the loop to update the location in the consol
+                                                        // every time
+            System.out.print(dir + "> ");
 
-            
             String input = scanner.nextLine().trim();
 
             if ("exit".equalsIgnoreCase(input)) {
@@ -83,7 +55,7 @@ public class CLI {
                 break;
             }
 
-            if ("help".equalsIgnoreCase(input)){
+            if ("help".equalsIgnoreCase(input)) {
                 showHelp();
             }
 
