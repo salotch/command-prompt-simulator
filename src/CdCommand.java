@@ -39,7 +39,7 @@ public class CdCommand implements Command {
             System.out.println("Changed directory to: " + System.getProperty("user.dir"));
 
         } else {
-            System.out.println("Usage:cd <directory>");
+            System.out.println("Usage: cd <directory>");
             return;
         }
     }
