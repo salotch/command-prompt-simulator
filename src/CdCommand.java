@@ -19,10 +19,10 @@ public class CdCommand implements Command {
             String targetDir = args[1];
             File newDir;
             if (targetDir.indexOf(":") != -1) {
-                System.out.println(targetDir);
+                // System.out.println(targetDir);
                 newDir = new File(targetDir);
             } else {
-                System.out.println(dirCurrent + "\\" + targetDir);
+                // System.out.println(dirCurrent + "\\" + targetDir);
                 newDir = new File(dirCurrent + "\\" + targetDir);
             }
 
