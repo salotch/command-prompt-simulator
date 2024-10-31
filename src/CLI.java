@@ -8,7 +8,7 @@ public class CLI {
 
         commandMap = new HashMap<>();
         commandMap.put("help", new HelpCommand());
-        commandMap.put("ls", new LsCommand(currentPathList));  // Pass currentPathList to LsCommand
+        commandMap.put("ls", new LsCommand());  // Pass currentPathList to LsCommand
         commandMap.put("touch", new TouchCommand());
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
@@ -16,6 +16,7 @@ public class CLI {
         commandMap.put("rm", new RmCommand());
         commandMap.put("cd..", new CdCommand());
         commandMap.put("mkdir", new MkDirCommand());
+        commandMap.put("pwd", new PwdCommand());
         commandMap.put("more", new MoreCommand());
         // Add other commands here
     }
