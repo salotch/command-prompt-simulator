@@ -19,6 +19,7 @@ public class PipeCommand implements Command {
                         pipfirst = true;
                         cli.executeCommand(args[i]);
                         output = new StringBuilder(LsCommand.listFilesOutput);
+                        // System.out.println(output);
                         LsCommand.listFilesOutput.setLength(0);
                         LsCommand.pipe = false;
                     } else if ((args[i].equals("more") || args[i].equals("unique")) && pipfirst) {
@@ -42,4 +43,5 @@ public class PipeCommand implements Command {
 
         }
     }
+    
 }

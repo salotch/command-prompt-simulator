@@ -31,7 +31,7 @@ public class LsCommand implements Command {
         parseArguments(args);  // Parse any flags or directory path arguments
         File directory = new File(directoryPath);
 
-         
+
         if (!directory.isDirectory()) {
             output.append("Error: ").append(directoryPath).append(" is not a directory.\n");
             System.out.print(output);

@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -20,6 +21,7 @@ public class CLI {
         commandMap.put("more", new MoreCommand());
         commandMap.put("unique", new UniqueCommand());
         commandMap.put("|", new PipeCommand());
+        commandMap.put("mv", new MvCommand());
         // Add other commands here
     }
 
@@ -57,7 +59,12 @@ public class CLI {
             }
 
             String fileName = parts[parts.length - 1];
-
+            String currentPath=System.getProperty("user.dir");
+            File f =new File(currentPath,fileName) ;
+            if(!f.exists()&&append){
+                System.out.println("This file not found, Enter help to know what this command do ");
+                return;
+            }
             // Filter out the redirection symbol and filename
             commandArgs = new String[parts.length - 2];
             System.arraycopy(parts, 0, commandArgs, 0, parts.length - 2);
