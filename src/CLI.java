@@ -4,11 +4,11 @@ import java.util.Scanner;
 
 public class CLI {
     private final Map<String, Command> commandMap;
-    
     public CLI() {
+
         commandMap = new HashMap<>();
         commandMap.put("help", new HelpCommand());
-        commandMap.put("ls", new LsCommand());
+        commandMap.put("ls", new LsCommand(currentPathList));  // Pass currentPathList to LsCommand
         commandMap.put("touch", new TouchCommand());
         commandMap.put("rmdir", new RmdirCommand());
         commandMap.put("cat", new CatCommand());
@@ -27,15 +27,33 @@ public class CLI {
             System.out.println("Command not found");
             return;
         }
+        String[] commandArgs;
 
         // Check for redirection operators
         if (input.contains(">") || input.contains(">>")) {
             boolean append = input.contains(">>");
+
+            // Ensure there's a filename after the redirection operator
+            if (parts.length < 3) {
+                System.out.println("Error: No filename provided after redirection operator.");
+                return;  // Exit the method, prompting the user to enter a new command
+            }
+            if (input.contains("cat >") && parts.length == 3){
+                System.out.println("Please type 'exit' to finish:");
+            }
+
             String fileName = parts[parts.length - 1];
+
+            // Filter out the redirection symbol and filename
+            commandArgs = new String[parts.length - 2];
+            System.arraycopy(parts, 0, commandArgs, 0, parts.length - 2);
+
             command = new RedirectionCommand(command, fileName, append);
+            command.execute(commandArgs);
+        }else {
+            // Pass all parts (including arguments and flags) to `execute` method in Command
+            command.execute(parts);
         }
-        // Pass all parts (including arguments and flags) to `execute` method in Command
-        command.execute(parts);
 
     }
 
@@ -47,7 +65,6 @@ public class CLI {
             String dir = System.getProperty("user.dir");// i put it in the loop to update the location in the consol
                                                         // every time
             System.out.print(dir + "> ");
-
             String input = scanner.nextLine().trim();
 
             if ("exit".equalsIgnoreCase(input)) {
