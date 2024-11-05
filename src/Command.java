@@ -1,3 +1,3 @@
 public interface Command {
-    String execute(String[] args);
+    void execute(String[] args);
 }
